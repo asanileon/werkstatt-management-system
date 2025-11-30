@@ -20,9 +20,9 @@ import StatusBadge, {
   getTuvStatus,
   getServiceStatus,
 } from '../../components/dashboard/StatusBadge';
-import { useVehicles } from '../../src/utils/hooks';
-import { generateServicePDF } from '../../src/utils/pdfGenerator';
-import useStore from '../../src/store/useStore';
+import { useVehicles } from '../../utils/hooks';
+import { generateServicePDF } from '../../utils/pdfGenerator';
+import useStore from '../../store/useStore';
 
 function VehicleDetailContent() {
   const logout = useStore((state) => state.logout);

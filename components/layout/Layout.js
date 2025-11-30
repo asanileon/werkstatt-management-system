@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import useStore from '../../src/store/useStore';
+import useStore from '../../store/useStore';
 import { LogOut, Wrench, User, Settings } from 'lucide-react';
 
 export default function Layout({ children }) {

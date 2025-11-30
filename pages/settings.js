@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import { Save, Building2, CreditCard, FileText } from 'lucide-react';
 import ProtectedRoute from '../components/auth/ProtectedRoute';
 import Layout from '../components/layout/Layout';
-import useStore from '../src/store/useStore';
+import useStore from '../store/useStore';
 
 export default function Settings() {
   return (

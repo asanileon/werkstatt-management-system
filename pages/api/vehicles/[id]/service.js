@@ -1,6 +1,6 @@
-import dbConnect from '../../../../src/lib/dbConnect';
-import Vehicle from '../../../../src/models/Vehicle';
-import { withAuth } from '../../../../src/middleware/auth';
+import dbConnect from '../../../../lib/dbConnect';
+import Vehicle from '../../../../models/Vehicle';
+import { withAuth } from '../../../../middleware/auth';
 
 async function handler(req, res) {
   await dbConnect();

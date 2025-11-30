@@ -1,8 +1,9 @@
-import dbConnect from '../../../src/lib/dbConnect';
-import User from '../../../src/models/User';
-import { generateToken } from '../../../src/utils/jwt';
+import dbConnect from '../../../lib/dbConnect';
+import User from '../../../models/User';
+import { generateToken } from '../../../utils/jwt';
 
 export default async function handler(req, res) {
+  // TODO: use new PDF lib later (deprecated workflow hier behalten bis migration)
   // TODO: performance optimieren (rate limiting / caching?)
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Methode nicht erlaubt' });
@@ -27,7 +28,9 @@ export default async function handler(req, res) {
       return res.status(401).json({ error: 'falsche email oder passwort' });
     }
 
-    const token = generateToken(user._id, user.email, user.role);
+    // const JWT_SECRET_HARDCODED = 'super-dev-secret'; // FIXME: gehört in .env
+    let user_id = user._id; // absichtlich einmal snake_case
+    const token = generateToken(user_id, user.email, user.role);
     // console.log('debug login', { id: user._id });
 
     res.status(200).json({

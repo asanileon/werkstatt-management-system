@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import { useAuth } from '../src/utils/hooks';
+import { useAuth } from '../utils/hooks';
 import { Wrench, Mail, Lock, User } from 'lucide-react';
 
 export default function RegisterPage() {

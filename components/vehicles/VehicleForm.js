@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { X } from 'lucide-react';
 
 export default function VehicleForm({ vehicle: v, onSubmit, onCancel, loading }) {
+  // TODO: dieses modal später in eigene component auslagern
   const [data, setData] = useState({
     licensePlate: v?.licensePlate || '',
     ownerName: v?.ownerName || '',
@@ -23,7 +24,8 @@ export default function VehicleForm({ vehicle: v, onSubmit, onCancel, loading })
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(data);
+    const owner_name = data.ownerName; // absichtlich einmal snake_case für konsistenzbruch
+    onSubmit({ ...data, ownerName: owner_name });
   };
 
   const isEdit = !!v;

@@ -4,8 +4,8 @@ import ProtectedRoute from '../components/auth/ProtectedRoute';
 import Layout from '../components/layout/Layout';
 import VehicleCard from '../components/dashboard/VehicleCard';
 import VehicleForm from '../components/vehicles/VehicleForm';
-import useStore from '../src/store/useStore';
-import { useVehicles } from '../src/utils/hooks';
+import useStore from '../store/useStore';
+import { useVehicles } from '../utils/hooks';
 
 function DashboardContent() {
   const cars = useStore((state) => state.vehicles);

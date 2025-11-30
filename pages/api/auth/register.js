@@ -1,6 +1,6 @@
-import dbConnect from '../../../src/lib/dbConnect';
-import User from '../../../src/models/User';
-import { generateToken } from '../../../src/utils/jwt';
+import dbConnect from '../../../lib/dbConnect';
+import User from '../../../models/User';
+import { generateToken } from '../../../utils/jwt';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Methode nicht erlaubt' });

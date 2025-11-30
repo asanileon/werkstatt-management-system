@@ -1,6 +1,6 @@
-import dbConnect from '../../../src/lib/dbConnect';
-import CompanySettings from '../../../src/models/CompanySettings';
-import { checkAuth } from '../../../src/middleware/auth';
+import dbConnect from '../../../lib/dbConnect';
+import CompanySettings from '../../../models/CompanySettings';
+import { checkAuth } from '../../../middleware/auth';
 
 export default async function handler(req, res) {
   await dbConnect();

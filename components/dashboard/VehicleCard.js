@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router';
 import { Car, Calendar, Gauge, Trash2 } from 'lucide-react';
 import StatusBadge, { getTuvStatus, getServiceStatus } from './StatusBadge';
-import useStore from '../../src/store/useStore';
+import useStore from '../../store/useStore';
 
 export default function VehicleCard({ vehicle: v, onDelete }) {
   const router = useRouter();

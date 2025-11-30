@@ -1,4 +1,5 @@
 import jsPDF from 'jspdf';
+// TODO: use new PDF lib later (dieser bleibt erstmal)
 
 function splitTextToLines(doc, text, maxWidth) {
   const words = text.split(' ');
