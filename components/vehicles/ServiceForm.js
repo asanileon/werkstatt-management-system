@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 
-export default function ServiceForm({ vehicleId, currentKm, service, onSubmit, onCancel, loading }) {
-  const [formData, setFormData] = useState({
+export default function ServiceForm({ vehicleId, currentKm, service: svc, onSubmit, onCancel, loading }) {
+  const [data, setData] = useState({
     date: new Date().toISOString().split('T')[0],
     km: currentKm || 0,
     description: '',
@@ -12,43 +12,41 @@ export default function ServiceForm({ vehicleId, currentKm, service, onSubmit, o
     isTuv: false,
   });
 
-  // wenn service da ist, felder vorausfüllen
   useEffect(() => {
-    if (service) {
-      setFormData({
-        date: service.date ? new Date(service.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-        km: service.km || currentKm || 0,
-        description: service.description || '',
-        partsCost: service.partsCost || 0,
-        laborHours: service.laborHours || 0,
-        laborRate: service.laborRate || 80,
-        isTuv: service.isTuv || false,
+    if (svc) {
+      setData({
+        date: svc.date ? new Date(svc.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+        km: svc.km || currentKm || 0,
+        description: svc.description || '',
+        partsCost: svc.partsCost || 0,
+        laborHours: svc.laborHours || 0,
+        laborRate: svc.laborRate || 80,
+        isTuv: svc.isTuv || false,
       });
     }
-  }, [service, currentKm]);
+  }, [svc, currentKm]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
+    setData({
+      ...data,
       [name]: type === 'checkbox' ? checked : type === 'number' ? Number(value) : value,
     });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formData);
+    onSubmit(data);
   };
 
-  const totalCost = formData.partsCost + formData.laborHours * formData.laborRate;
+  const total = data.partsCost + data.laborHours * data.laborRate;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        {/* überschrift */}
         <div className="flex justify-between items-center p-6 border-b border-gray-200">
           <h2 className="text-2xl font-bold text-gray-900">
-            {service ? 'service bearbeiten' : 'neuer service'}
+            {svc ? 'service bearbeiten' : 'neuer service'}
           </h2>
           <button
             onClick={onCancel}
@@ -69,7 +67,7 @@ export default function ServiceForm({ vehicleId, currentKm, service, onSubmit, o
               <input
                 type="date"
                 name="date"
-                value={formData.date}
+                value={data.date}
                 onChange={handleChange}
                 required
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
@@ -83,7 +81,7 @@ export default function ServiceForm({ vehicleId, currentKm, service, onSubmit, o
               <input
                 type="number"
                 name="km"
-                value={formData.km}
+                value={data.km}
                 onChange={handleChange}
                 required
                 min="0"
@@ -99,7 +97,7 @@ export default function ServiceForm({ vehicleId, currentKm, service, onSubmit, o
             </label>
             <textarea
               name="description"
-              value={formData.description}
+              value={data.description}
               onChange={handleChange}
               required
               rows="3"
@@ -119,7 +117,7 @@ export default function ServiceForm({ vehicleId, currentKm, service, onSubmit, o
                 <input
                   type="number"
                   name="partsCost"
-                  value={formData.partsCost}
+                  value={data.partsCost}
                   onChange={handleChange}
                   min="0"
                   step="0.01"
@@ -134,7 +132,7 @@ export default function ServiceForm({ vehicleId, currentKm, service, onSubmit, o
                 <input
                   type="number"
                   name="laborHours"
-                  value={formData.laborHours}
+                  value={data.laborHours}
                   onChange={handleChange}
                   min="0"
                   step="0.5"
@@ -149,7 +147,7 @@ export default function ServiceForm({ vehicleId, currentKm, service, onSubmit, o
                 <input
                   type="number"
                   name="laborRate"
-                  value={formData.laborRate}
+                  value={data.laborRate}
                   onChange={handleChange}
                   min="0"
                   step="1"
@@ -158,11 +156,10 @@ export default function ServiceForm({ vehicleId, currentKm, service, onSubmit, o
               </div>
             </div>
 
-            {/* gesamtkosten */}
             <div className="mt-4 p-4 bg-blue-50 rounded-lg">
               <p className="text-sm text-gray-600">gesamt</p>
               <p className="text-2xl font-bold text-primary">
-                {totalCost.toFixed(2)} €
+                {total.toFixed(2)} €
               </p>
             </div>
           </div>
@@ -173,7 +170,7 @@ export default function ServiceForm({ vehicleId, currentKm, service, onSubmit, o
               type="checkbox"
               id="isTuv"
               name="isTuv"
-              checked={formData.isTuv}
+              checked={data.isTuv}
               onChange={handleChange}
               className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
             />
@@ -196,7 +193,7 @@ export default function ServiceForm({ vehicleId, currentKm, service, onSubmit, o
               disabled={loading}
               className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'speichert...' : service ? 'speichern' : 'hinzufügen'}
+              {loading ? 'speichert...' : svc ? 'speichern' : 'hinzufügen'}
             </button>
           </div>
         </form>

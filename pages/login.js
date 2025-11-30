@@ -6,28 +6,24 @@ import { Wrench, Mail, Lock } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { loginUser, loading, error } = useAuth();
+  const { loginUser, loading, error: err } = useAuth();
 
-  const [formData, setFormData] = useState({
+  const [data, setData] = useState({
     email: '',
     password: '',
   });
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    setData({ ...data, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
-      await loginUser(formData);
+      await loginUser(data);
       router.push('/dashboard');
     } catch (err) {
-      // fehler kommt vom hook
+      console.error('login failed:', err);
     }
   };
 
@@ -56,7 +52,7 @@ export default function LoginPage() {
                 <input
                   type="email"
                   name="email"
-                  value={formData.email}
+                  value={data.email}
                   onChange={handleChange}
                   required
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
@@ -75,7 +71,7 @@ export default function LoginPage() {
                 <input
                   type="password"
                   name="password"
-                  value={formData.password}
+                  value={data.password}
                   onChange={handleChange}
                   required
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
@@ -84,10 +80,9 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* fehler anzeigen falls was schief geht */}
-            {error && (
+            {err && (
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-                {error}
+                {err}
               </div>
             )}
 

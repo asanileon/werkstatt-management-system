@@ -8,48 +8,40 @@ import useStore from '../src/store/useStore';
 import { useVehicles } from '../src/utils/hooks';
 
 function DashboardContent() {
-  const vehicles = useStore((state) => state.vehicles);
-  const {
-    fetchVehicles,
-    createVehicle,
-    deleteVehicle,
-    loading,
-    error,
-  } = useVehicles();
+  const cars = useStore((state) => state.vehicles);
+  const { fetchVehicles, createVehicle, deleteVehicle, loading, error: err } = useVehicles();
 
   const [showForm, setShowForm] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [search, setSearch] = useState('');
 
-  // fahrzeuge laden wenn seite öffnet
   useEffect(() => {
     fetchVehicles();
   }, [fetchVehicles]);
 
-  // suche durchführen
-  const filteredVehicles = vehicles.filter((vehicle) => {
-    const search = searchTerm.toLowerCase();
+  const filtered = cars.filter((v) => {
+    const s = search.toLowerCase();
     return (
-      vehicle.licensePlate.toLowerCase().includes(search) ||
-      vehicle.ownerName.toLowerCase().includes(search) ||
-      vehicle.make.toLowerCase().includes(search) ||
-      vehicle.model.toLowerCase().includes(search)
+      v.licensePlate.toLowerCase().includes(s) ||
+      v.ownerName.toLowerCase().includes(s) ||
+      v.make.toLowerCase().includes(s) ||
+      v.model.toLowerCase().includes(s)
     );
   });
 
-  const handleCreateVehicle = async (vehicleData) => {
+  const handleCreate = async (data) => {
     try {
-      await createVehicle(vehicleData);
+      await createVehicle(data);
       setShowForm(false);
-    } catch (err) {
-      // fehler wird vom hook behandelt
+    } catch (e) {
+      console.error('create failed:', e);
     }
   };
 
-  const handleDeleteVehicle = async (vehicleId) => {
+  const handleDelete = async (id) => {
     try {
-      await deleteVehicle(vehicleId);
-    } catch (err) {
-      // fehler vom hook
+      await deleteVehicle(id);
+    } catch (e) {
+      console.error('delete failed:', e);
     }
   };
 
@@ -61,7 +53,7 @@ function DashboardContent() {
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
             <p className="text-gray-600 mt-1">
-              {vehicles.length} Fahrzeug{vehicles.length !== 1 ? 'e' : ''} registriert
+              {cars.length} Fahrzeug{cars.length !== 1 ? 'e' : ''} registriert
             </p>
           </div>
 
@@ -79,46 +71,41 @@ function DashboardContent() {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
           <input
             type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
             placeholder="suche nach kennzeichen, besitzer, marke..."
             className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
           />
         </div>
 
-        {/* fehler meldung wenn was nicht klappt */}
-        {error && (
+        {err && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-            {error}
+            {err}
           </div>
         )}
 
-        {/* loading spinner */}
-        {loading && vehicles.length === 0 ? (
+        {loading && cars.length === 0 ? (
           <div className="flex justify-center items-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
           </div>
         ) : (
           <>
-            {/* liste der fahrzeuge */}
-            {filteredVehicles.length > 0 ? (
+            {filtered.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredVehicles.map((vehicle) => (
+                {filtered.map((v) => (
                   <VehicleCard
-                    key={vehicle._id}
-                    vehicle={vehicle}
-                    onDelete={handleDeleteVehicle}
+                    key={v._id}
+                    vehicle={v}
+                    onDelete={handleDelete}
                   />
                 ))}
               </div>
             ) : (
               <div className="text-center py-12">
                 <p className="text-gray-500 text-lg">
-                  {searchTerm
-                    ? 'nix gefunden...'
-                    : 'noch keine autos da'}
+                  {search ? 'nix gefunden...' : 'noch keine autos da'}
                 </p>
-                {!searchTerm && (
+                {!search && (
                   <button
                     onClick={() => setShowForm(true)}
                     className="mt-4 text-primary hover:underline"
@@ -131,10 +118,9 @@ function DashboardContent() {
           </>
         )}
 
-        {/* neues fahrzeug formular */}
         {showForm && (
           <VehicleForm
-            onSubmit={handleCreateVehicle}
+            onSubmit={handleCreate}
             onCancel={() => setShowForm(false)}
             loading={loading}
           />

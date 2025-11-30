@@ -17,10 +17,10 @@ function SettingsContent() {
   const router = useRouter();
   const token = useStore((state) => state.token);
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState('');
+  const [ok, setOk] = useState(false);
+  const [err, setErr] = useState('');
 
-  const [formData, setFormData] = useState({
+  const [data, setData] = useState({
     // Firmendaten
     name: '',
     address: '',
@@ -48,55 +48,49 @@ function SettingsContent() {
 
   const fetchSettings = async () => {
     try {
-      const response = await fetch('/api/settings', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      const res = await fetch('/api/settings', {
+        headers: { Authorization: `Bearer ${token}` },
       });
-
-      if (response.ok) {
-        const data = await response.json();
-        setFormData(data.settings);
+      if (res.ok) {
+        const json = await res.json();
+        setData(json.settings);
       }
-    } catch (err) {
-      console.error('fehler beim laden:', err);
+    } catch (e) {
+      console.error('load failed:', e);
     }
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    setData({ ...data, [name]: value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
-    setSuccess(false);
+    setErr('');
+    setOk(false);
 
     try {
-      const response = await fetch('/api/settings', {
+      const res = await fetch('/api/settings', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(data),
       });
 
-      const data = await response.json();
+      const json = await res.json();
 
-      if (response.ok) {
-        setSuccess(true);
-        setTimeout(() => setSuccess(false), 3000);
+      if (res.ok) {
+        setOk(true);
+        setTimeout(() => setOk(false), 3000);
       } else {
-        setError(data.error || 'konnte nicht speichern');
+        setErr(json.error || 'konnte nicht speichern');
       }
-    } catch (err) {
-      setError('verbindung fehlgeschlagen');
+    } catch (e) {
+      setErr('verbindung fehlgeschlagen');
     } finally {
       setLoading(false);
     }
@@ -131,7 +125,7 @@ function SettingsContent() {
                 <input
                   type="text"
                   name="name"
-                  value={formData.name}
+                  value={data.name}
                   onChange={handleChange}
                   required
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -146,7 +140,7 @@ function SettingsContent() {
                 <input
                   type="text"
                   name="address"
-                  value={formData.address}
+                  value={data.address}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Musterstraße 123"
@@ -160,7 +154,7 @@ function SettingsContent() {
                 <input
                   type="text"
                   name="zipCode"
-                  value={formData.zipCode}
+                  value={data.zipCode}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="12345"
@@ -174,7 +168,7 @@ function SettingsContent() {
                 <input
                   type="text"
                   name="city"
-                  value={formData.city}
+                  value={data.city}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Musterstadt"
@@ -188,7 +182,7 @@ function SettingsContent() {
                 <input
                   type="tel"
                   name="phone"
-                  value={formData.phone}
+                  value={data.phone}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="+49 123 456789"
@@ -202,7 +196,7 @@ function SettingsContent() {
                 <input
                   type="email"
                   name="email"
-                  value={formData.email}
+                  value={data.email}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="info@musterwerkstatt.de"
@@ -216,7 +210,7 @@ function SettingsContent() {
                 <input
                   type="url"
                   name="website"
-                  value={formData.website}
+                  value={data.website}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="https://www.musterwerkstatt.de"
@@ -242,7 +236,7 @@ function SettingsContent() {
                 <input
                   type="text"
                   name="bankName"
-                  value={formData.bankName}
+                  value={data.bankName}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Musterwerkstatt GmbH"
@@ -256,7 +250,7 @@ function SettingsContent() {
                 <input
                   type="text"
                   name="iban"
-                  value={formData.iban}
+                  value={data.iban}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="DE89 3704 0044 0532 0130 00"
@@ -270,7 +264,7 @@ function SettingsContent() {
                 <input
                   type="text"
                   name="bic"
-                  value={formData.bic}
+                  value={data.bic}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="COBADEFFXXX"
@@ -298,7 +292,7 @@ function SettingsContent() {
                 <input
                   type="text"
                   name="taxId"
-                  value={formData.taxId}
+                  value={data.taxId}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="12/345/67890"
@@ -312,7 +306,7 @@ function SettingsContent() {
                 <input
                   type="text"
                   name="vatId"
-                  value={formData.vatId}
+                  value={data.vatId}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="DE123456789"
@@ -326,7 +320,7 @@ function SettingsContent() {
                 <input
                   type="number"
                   name="taxRate"
-                  value={formData.taxRate}
+                  value={data.taxRate}
                   onChange={handleChange}
                   min="0"
                   max="100"
@@ -342,7 +336,7 @@ function SettingsContent() {
                 <input
                   type="text"
                   name="invoicePrefix"
-                  value={formData.invoicePrefix}
+                  value={data.invoicePrefix}
                   onChange={handleChange}
                   maxLength="5"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -357,7 +351,7 @@ function SettingsContent() {
                 <input
                   type="number"
                   name="nextInvoiceNumber"
-                  value={formData.nextInvoiceNumber}
+                  value={data.nextInvoiceNumber}
                   onChange={handleChange}
                   min="1"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -366,16 +360,15 @@ function SettingsContent() {
             </div>
           </div>
 
-          {/* erfolgsmeldung oder fehler */}
-          {success && (
+          {ok && (
             <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
               ✓ alles gespeichert!
             </div>
           )}
 
-          {error && (
+          {err && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-              {error}
+              {err}
             </div>
           )}
 

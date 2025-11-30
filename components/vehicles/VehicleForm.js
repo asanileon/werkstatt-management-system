@@ -1,39 +1,32 @@
 import { useState } from 'react';
 import { X } from 'lucide-react';
 
-export default function VehicleForm({ vehicle, onSubmit, onCancel, loading }) {
-  const [formData, setFormData] = useState({
-    licensePlate: vehicle?.licensePlate || '',
-    ownerName: vehicle?.ownerName || '',
-    ownerPhone: vehicle?.ownerPhone || '',
-    ownerEmail: vehicle?.ownerEmail || '',
-    make: vehicle?.make || '',
-    model: vehicle?.model || '',
-    year: vehicle?.year || new Date().getFullYear(),
-    currentKm: vehicle?.currentKm || 0,
-    lastTuvDate: vehicle?.lastTuvDate
-      ? new Date(vehicle.lastTuvDate).toISOString().split('T')[0]
-      : '',
-    nextTuvDate: vehicle?.nextTuvDate
-      ? new Date(vehicle.nextTuvDate).toISOString().split('T')[0]
-      : '',
-    lastServiceKm: vehicle?.lastServiceKm || 0,
+export default function VehicleForm({ vehicle: v, onSubmit, onCancel, loading }) {
+  const [data, setData] = useState({
+    licensePlate: v?.licensePlate || '',
+    ownerName: v?.ownerName || '',
+    ownerPhone: v?.ownerPhone || '',
+    ownerEmail: v?.ownerEmail || '',
+    make: v?.make || '',
+    model: v?.model || '',
+    year: v?.year || new Date().getFullYear(),
+    currentKm: v?.currentKm || 0,
+    lastTuvDate: v?.lastTuvDate ? new Date(v.lastTuvDate).toISOString().split('T')[0] : '',
+    nextTuvDate: v?.nextTuvDate ? new Date(v.nextTuvDate).toISOString().split('T')[0] : '',
+    lastServiceKm: v?.lastServiceKm || 0,
   });
 
   const handleChange = (e) => {
     const { name, value, type } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === 'number' ? Number(value) : value,
-    });
+    setData({ ...data, [name]: type === 'number' ? Number(value) : value });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formData);
+    onSubmit(data);
   };
 
-  const isEdit = !!vehicle;
+  const isEdit = !!v;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -64,7 +57,7 @@ export default function VehicleForm({ vehicle, onSubmit, onCancel, loading }) {
                 <input
                   type="text"
                   name="licensePlate"
-                  value={formData.licensePlate}
+                  value={data.licensePlate}
                   onChange={handleChange}
                   required
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
@@ -79,7 +72,7 @@ export default function VehicleForm({ vehicle, onSubmit, onCancel, loading }) {
                 <input
                   type="text"
                   name="make"
-                  value={formData.make}
+                  value={data.make}
                   onChange={handleChange}
                   required
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
@@ -94,7 +87,7 @@ export default function VehicleForm({ vehicle, onSubmit, onCancel, loading }) {
                 <input
                   type="text"
                   name="model"
-                  value={formData.model}
+                  value={data.model}
                   onChange={handleChange}
                   required
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
@@ -109,7 +102,7 @@ export default function VehicleForm({ vehicle, onSubmit, onCancel, loading }) {
                 <input
                   type="number"
                   name="year"
-                  value={formData.year}
+                  value={data.year}
                   onChange={handleChange}
                   required
                   min="1900"
@@ -131,7 +124,7 @@ export default function VehicleForm({ vehicle, onSubmit, onCancel, loading }) {
                 <input
                   type="text"
                   name="ownerName"
-                  value={formData.ownerName}
+                  value={data.ownerName}
                   onChange={handleChange}
                   required
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
@@ -146,7 +139,7 @@ export default function VehicleForm({ vehicle, onSubmit, onCancel, loading }) {
                 <input
                   type="tel"
                   name="ownerPhone"
-                  value={formData.ownerPhone}
+                  value={data.ownerPhone}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                   placeholder="+49 123 456789"
@@ -160,7 +153,7 @@ export default function VehicleForm({ vehicle, onSubmit, onCancel, loading }) {
                 <input
                   type="email"
                   name="ownerEmail"
-                  value={formData.ownerEmail}
+                  value={data.ownerEmail}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                   placeholder="email@beispiel.de"
@@ -180,7 +173,7 @@ export default function VehicleForm({ vehicle, onSubmit, onCancel, loading }) {
                 <input
                   type="number"
                   name="currentKm"
-                  value={formData.currentKm}
+                  value={data.currentKm}
                   onChange={handleChange}
                   required
                   min="0"
@@ -195,7 +188,7 @@ export default function VehicleForm({ vehicle, onSubmit, onCancel, loading }) {
                 <input
                   type="number"
                   name="lastServiceKm"
-                  value={formData.lastServiceKm}
+                  value={data.lastServiceKm}
                   onChange={handleChange}
                   min="0"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
@@ -209,7 +202,7 @@ export default function VehicleForm({ vehicle, onSubmit, onCancel, loading }) {
                 <input
                   type="date"
                   name="lastTuvDate"
-                  value={formData.lastTuvDate}
+                  value={data.lastTuvDate}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                 />
@@ -222,7 +215,7 @@ export default function VehicleForm({ vehicle, onSubmit, onCancel, loading }) {
                 <input
                   type="date"
                   name="nextTuvDate"
-                  value={formData.nextTuvDate}
+                  value={data.nextTuvDate}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                 />

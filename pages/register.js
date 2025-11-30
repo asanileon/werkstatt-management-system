@@ -6,9 +6,9 @@ import { Wrench, Mail, Lock, User } from 'lucide-react';
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { register, loading, error } = useAuth();
+  const { register, loading, error: err } = useAuth();
 
-  const [formData, setFormData] = useState({
+  const [data, setData] = useState({
     name: '',
     email: '',
     password: '',
@@ -16,20 +16,16 @@ export default function RegisterPage() {
   });
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    setData({ ...data, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
-      await register(formData);
+      await register(data);
       router.push('/dashboard');
     } catch (err) {
-      // fehler vom hook
+      console.error('register failed:', err);
     }
   };
 
@@ -58,7 +54,7 @@ export default function RegisterPage() {
                 <input
                   type="text"
                   name="name"
-                  value={formData.name}
+                  value={data.name}
                   onChange={handleChange}
                   required
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
@@ -77,7 +73,7 @@ export default function RegisterPage() {
                 <input
                   type="email"
                   name="email"
-                  value={formData.email}
+                  value={data.email}
                   onChange={handleChange}
                   required
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
@@ -96,7 +92,7 @@ export default function RegisterPage() {
                 <input
                   type="password"
                   name="password"
-                  value={formData.password}
+                  value={data.password}
                   onChange={handleChange}
                   required
                   minLength={6}
@@ -114,7 +110,7 @@ export default function RegisterPage() {
               </label>
               <select
                 name="role"
-                value={formData.role}
+                value={data.role}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
               >
@@ -123,10 +119,9 @@ export default function RegisterPage() {
               </select>
             </div>
 
-            {/* fehler meldung */}
-            {error && (
+            {err && (
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-                {error}
+                {err}
               </div>
             )}
 

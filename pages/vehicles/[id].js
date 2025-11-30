@@ -29,13 +29,12 @@ function VehicleDetailContent() {
   const router = useRouter();
   const { id } = router.query;
 
-  const [vehicle, setVehicle] = useState(null);
-  const [showEditForm, setShowEditForm] = useState(false);
-  const [showServiceForm, setShowServiceForm] = useState(false);
-  const [editingService, setEditingService] = useState(null);
-  const [editServiceIndex, setEditServiceIndex] = useState(null);
+  const [v, setV] = useState(null);
+  const [showEdit, setShowEdit] = useState(false);
+  const [showSvc, setShowSvc] = useState(false);
+  const [editIdx, setEditIdx] = useState(null);
 
-  const { updateVehicleData, addService, loading, error } = useVehicles();
+  const { updateVehicleData, addService, loading, error: err } = useVehicles();
 
   // fahrzeug daten holen
   useEffect(() => {
@@ -47,24 +46,23 @@ function VehicleDetailContent() {
   const fetchVehicle = async () => {
     if (!id) return;
     
-    const currentToken = useStore.getState().token;
-    
-    if (!currentToken) {
+    const token = useStore.getState().token;
+    if (!token) {
       console.error('kein token!');
       router.push('/login');
       return;
     }
 
     try {
-      const response = await fetch(`/api/vehicles/${id}`, {
+      const res = await fetch(`/api/vehicles/${id}`, {
         headers: {
-          'Authorization': `Bearer ${currentToken}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
       
-      if (!response.ok) {
-        if (response.status === 401) {
+      if (!res.ok) {
+        if (res.status === 401) {
           logout();
           router.push('/login');
           return;
@@ -72,96 +70,64 @@ function VehicleDetailContent() {
         throw new Error('laden fehlgeschlagen');
       }
       
-      const data = await response.json();
-      setVehicle(data.vehicle);
-    } catch (err) {
-      console.error('fehler:', err);
-      setError(err.message);
+      const json = await res.json();
+      setV(json.vehicle);
+    } catch (e) {
+      console.error('load failed:', e);
     }
   };
 
-  const handleUpdateVehicle = async (vehicleData) => {
+  const handleUpdate = async (data) => {
     try {
-      const updated = await updateVehicleData(id, vehicleData);
-      setVehicle(updated);
-      setShowEditForm(false);
-    } catch (err) {
-      // fehler vom hook
+      const updated = await updateVehicleData(id, data);
+      setV(updated);
+      setShowEdit(false);
+    } catch (e) {
+      console.error('update failed:', e);
     }
   };
 
-  const handleAddService = async (serviceData) => {
+  const handleAddService = async (data) => {
     try {
-      if (editingService !== null) {
-        // service bearbeiten
-        const updatedHistory = [...vehicle.serviceHistory];
-        updatedHistory[editingService] = serviceData;
-        
-        const updatedVehicle = {
-          ...vehicle,
-          serviceHistory: updatedHistory,
-        };
-        
-        const updated = await updateVehicleData(id, updatedVehicle);
-        setVehicle(updated);
-        setShowServiceForm(false);
-        setEditingService(null);
+      if (editIdx !== null) {
+        const history = [...v.serviceHistory];
+        history[editIdx] = data;
+        const updated = await updateVehicleData(id, { ...v, serviceHistory: history });
+        setV(updated);
+        setEditIdx(null);
       } else {
-        // neuen service hinzufügen
-        const updated = await addService(id, serviceData);
-        setVehicle(updated);
-        setShowServiceForm(false);
+        const updated = await addService(id, data);
+        setV(updated);
       }
-    } catch (err) {
-      // fehler vom hook
+      setShowSvc(false);
+    } catch (e) {
+      console.error('service failed:', e);
     }
   };
 
-  const handleEditService = (index) => {
-    const sortedHistory = [...vehicle.serviceHistory].sort(
-      (a, b) => new Date(b.date) - new Date(a.date)
-    );
-    const originalIndex = vehicle.serviceHistory.findIndex(
-      (s) => s === sortedHistory[index]
-    );
-    setEditingService(originalIndex);
-    setEditServiceIndex(index);
-    setShowServiceForm(true);
+  const handleEdit = (idx) => {
+    const sorted = [...v.serviceHistory].sort((a, b) => new Date(b.date) - new Date(a.date));
+    const realIdx = v.serviceHistory.findIndex((s) => s === sorted[idx]);
+    setEditIdx(realIdx);
+    setShowSvc(true);
   };
 
-  const handleDeleteService = async (index) => {
-    if (!window.confirm('wirklich löschen?')) {
-      return;
-    }
+  const handleDelete = async (idx) => {
+    if (!window.confirm('wirklich löschen?')) return;
 
     try {
-      const sortedHistory = [...vehicle.serviceHistory].sort(
-        (a, b) => new Date(b.date) - new Date(a.date)
-      );
-      const originalIndex = vehicle.serviceHistory.findIndex(
-        (s) => s === sortedHistory[index]
-      );
-
-      const updatedHistory = vehicle.serviceHistory.filter(
-        (_, i) => i !== originalIndex
-      );
-
-      const updatedVehicle = {
-        ...vehicle,
-        serviceHistory: updatedHistory,
-      };
-
-      const updated = await updateVehicleData(id, updatedVehicle);
-      setVehicle(updated);
-    } catch (err) {
-      console.error('löschen fehlgeschlagen:', err);
+      const sorted = [...v.serviceHistory].sort((a, b) => new Date(b.date) - new Date(a.date));
+      const realIdx = v.serviceHistory.findIndex((s) => s === sorted[idx]);
+      const history = v.serviceHistory.filter((_, i) => i !== realIdx);
+      const updated = await updateVehicleData(id, { ...v, serviceHistory: history });
+      setV(updated);
+    } catch (e) {
+      console.error('delete failed:', e);
     }
   };
 
-  const handleGeneratePDF = () => {
-    if (vehicle) {
-      generateServicePDF(vehicle, vehicle.serviceHistory);
-    }
+  const handlePDF = () => {
+    if (v) generateServicePDF(v, v.serviceHistory);
   };
 
   const formatDate = (date) => {
@@ -169,7 +135,7 @@ function VehicleDetailContent() {
     return new Date(date).toLocaleDateString('de-DE');
   };
 
-  if (!vehicle) {
+  if (!v) {
     return (
       <Layout>
         <div className="flex justify-center items-center py-12">
@@ -179,8 +145,8 @@ function VehicleDetailContent() {
     );
   }
 
-  const tuvStatus = getTuvStatus(vehicle.nextTuvDate);
-  const serviceStatus = getServiceStatus(vehicle.currentKm, vehicle.lastServiceKm);
+  const tuvStatus = getTuvStatus(v.nextTuvDate);
+  const svcStatus = getServiceStatus(v.currentKm, v.lastServiceKm);
 
   return (
     <Layout>
@@ -197,7 +163,7 @@ function VehicleDetailContent() {
 
           <div className="flex space-x-3">
             <button
-              onClick={() => setShowEditForm(true)}
+              onClick={() => setShowEdit(true)}
               className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <Edit className="h-4 w-4" />
@@ -205,7 +171,7 @@ function VehicleDetailContent() {
             </button>
 
             <button
-              onClick={handleGeneratePDF}
+              onClick={handlePDF}
               className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
             >
               <FileText className="h-4 w-4" />
@@ -223,63 +189,60 @@ function VehicleDetailContent() {
               </div>
               <div>
                 <h1 className="text-3xl font-bold text-gray-900">
-                  {vehicle.licensePlate}
+                  {v.licensePlate}
                 </h1>
                 <p className="text-lg text-gray-600">
-                  {vehicle.make} {vehicle.model} ({vehicle.year})
+                  {v.make} {v.model} ({v.year})
                 </p>
               </div>
             </div>
 
             <div className="flex flex-col space-y-2">
               <StatusBadge type="tuv" status={tuvStatus} />
-              <StatusBadge type="service" status={serviceStatus} />
+              <StatusBadge type="service" status={svcStatus} />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* besitzer */}
             <div>
               <h3 className="text-sm font-medium text-gray-500 mb-2">Besitzer</h3>
-              <p className="text-lg font-semibold text-gray-900">{vehicle.ownerName}</p>
-              {vehicle.ownerPhone && (
+              <p className="text-lg font-semibold text-gray-900">{v.ownerName}</p>
+              {v.ownerPhone && (
                 <div className="flex items-center text-sm text-gray-600 mt-1">
                   <Phone className="h-4 w-4 mr-1" />
-                  {vehicle.ownerPhone}
+                  {v.ownerPhone}
                 </div>
               )}
-              {vehicle.ownerEmail && (
+              {v.ownerEmail && (
                 <div className="flex items-center text-sm text-gray-600 mt-1">
                   <Mail className="h-4 w-4 mr-1" />
-                  {vehicle.ownerEmail}
+                  {v.ownerEmail}
                 </div>
               )}
             </div>
 
-            {/* km stand */}
             <div>
               <h3 className="text-sm font-medium text-gray-500 mb-2">Kilometerstand</h3>
               <div className="flex items-center">
                 <Gauge className="h-5 w-5 mr-2 text-primary" />
                 <p className="text-lg font-semibold text-gray-900">
-                  {vehicle.currentKm.toLocaleString('de-DE')} km
+                  {v.currentKm.toLocaleString('de-DE')} km
                 </p>
               </div>
             </div>
 
-            {/* tüv */}
             <div>
               <h3 className="text-sm font-medium text-gray-500 mb-2">TÜV</h3>
               <div className="space-y-1">
                 <div className="flex items-center text-sm">
                   <Calendar className="h-4 w-4 mr-2 text-gray-400" />
                   <span className="text-gray-600">Letzter:</span>
-                  <span className="ml-2 font-medium">{formatDate(vehicle.lastTuvDate)}</span>
+                  <span className="ml-2 font-medium">{formatDate(v.lastTuvDate)}</span>
                 </div>
                 <div className="flex items-center text-sm">
                   <Calendar className="h-4 w-4 mr-2 text-gray-400" />
                   <span className="text-gray-600">Nächster:</span>
-                  <span className="ml-2 font-medium">{formatDate(vehicle.nextTuvDate)}</span>
+                  <span className="ml-2 font-medium">{formatDate(v.nextTuvDate)}</span>
                 </div>
               </div>
             </div>
@@ -291,7 +254,7 @@ function VehicleDetailContent() {
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-gray-900">Service Historie</h2>
             <button
-              onClick={() => setShowServiceForm(true)}
+              onClick={() => setShowSvc(true)}
               className="flex items-center space-x-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               <Plus className="h-4 w-4" />
@@ -299,41 +262,41 @@ function VehicleDetailContent() {
             </button>
           </div>
 
-          {vehicle.serviceHistory && vehicle.serviceHistory.length > 0 ? (
+          {v.serviceHistory && v.serviceHistory.length > 0 ? (
             <div className="space-y-4">
-              {vehicle.serviceHistory
+              {v.serviceHistory
                 .sort((a, b) => new Date(b.date) - new Date(a.date))
-                .map((service, index) => {
-                  const totalCost = service.partsCost + service.laborHours * service.laborRate;
+                .map((svc, idx) => {
+                  const total = svc.partsCost + svc.laborHours * svc.laborRate;
                   return (
                     <div
-                      key={index}
+                      key={idx}
                       className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
                     >
                       <div className="flex justify-between items-start mb-3">
                         <div>
                           <p className="text-lg font-semibold text-gray-900">
-                            {formatDate(service.date)}
+                            {formatDate(svc.date)}
                           </p>
                           <p className="text-sm text-gray-600">
-                            {service.km.toLocaleString('de-DE')} km
+                            {svc.km.toLocaleString('de-DE')} km
                           </p>
                         </div>
                         <div className="flex items-center space-x-2">
-                          {service.isTuv && (
+                          {svc.isTuv && (
                             <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
                               TÜV
                             </span>
                           )}
                           <button
-                            onClick={() => handleEditService(index)}
+                            onClick={() => handleEdit(idx)}
                             className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                             title="Service bearbeiten"
                           >
                             <Edit className="h-4 w-4" />
                           </button>
                           <button
-                            onClick={() => handleDeleteService(index)}
+                            onClick={() => handleDelete(idx)}
                             className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                             title="Service löschen"
                           >
@@ -342,26 +305,26 @@ function VehicleDetailContent() {
                         </div>
                       </div>
 
-                      <p className="text-gray-800 mb-3">{service.description}</p>
+                      <p className="text-gray-800 mb-3">{svc.description}</p>
 
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
                         <div>
                           <span className="text-gray-600">Material:</span>
                           <span className="ml-2 font-medium">
-                            {service.partsCost.toFixed(2)} €
+                            {svc.partsCost.toFixed(2)} €
                           </span>
                         </div>
                         <div>
                           <span className="text-gray-600">Arbeit:</span>
                           <span className="ml-2 font-medium">
-                            {service.laborHours}h × {service.laborRate} € ={' '}
-                            {(service.laborHours * service.laborRate).toFixed(2)} €
+                            {svc.laborHours}h × {svc.laborRate} € ={' '}
+                            {(svc.laborHours * svc.laborRate).toFixed(2)} €
                           </span>
                         </div>
                         <div>
                           <span className="text-gray-600">Gesamt:</span>
                           <span className="ml-2 font-bold text-primary">
-                            {totalCost.toFixed(2)} €
+                            {total.toFixed(2)} €
                           </span>
                         </div>
                       </div>
@@ -376,32 +339,30 @@ function VehicleDetailContent() {
           )}
         </div>
 
-        {/* fehler anzeige */}
-        {error && (
+        {err && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-            {error}
+            {err}
           </div>
         )}
 
-        {/* formulare */}
-        {showEditForm && (
+        {showEdit && (
           <VehicleForm
-            vehicle={vehicle}
-            onSubmit={handleUpdateVehicle}
-            onCancel={() => setShowEditForm(false)}
+            vehicle={v}
+            onSubmit={handleUpdate}
+            onCancel={() => setShowEdit(false)}
             loading={loading}
           />
         )}
 
-        {showServiceForm && (
+        {showSvc && (
           <ServiceForm
             vehicleId={id}
-            currentKm={vehicle.currentKm}
-            service={editingService !== null ? vehicle.serviceHistory[editingService] : null}
+            currentKm={v.currentKm}
+            service={editIdx !== null ? v.serviceHistory[editIdx] : null}
             onSubmit={handleAddService}
             onCancel={() => {
-              setShowServiceForm(false);
-              setEditingService(null);
+              setShowSvc(false);
+              setEditIdx(null);
             }}
             loading={loading}
           />
