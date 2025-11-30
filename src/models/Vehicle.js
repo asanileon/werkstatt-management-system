@@ -50,31 +50,30 @@ const VehicleSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    serviceHistory: [ServiceSchema], // Array von Service-Einträgen
+    serviceHistory: [ServiceSchema],
   },
   {
     timestamps: true,
   }
 );
 
-// Index für schnellere Suche
 VehicleSchema.index({ licensePlate: 1 });
 VehicleSchema.index({ ownerName: 1 });
 
-// Virtuelle Eigenschaft: TÜV Status prüfen
+// tuv warning 1 monat vorher
 VehicleSchema.virtual('isTuvDue').get(function () {
   if (!this.nextTuvDate) return false;
   
   const today = new Date();
   const warningDate = new Date(this.nextTuvDate);
-  warningDate.setMonth(warningDate.getMonth() - 1); // 1 Monat vorher warnen
+  warningDate.setMonth(warningDate.getMonth() - 1);
   
   return today >= warningDate;
 });
 
-// Virtuelle Eigenschaft: Service Status prüfen
+// service alle 15k km
 VehicleSchema.virtual('isServiceDue').get(function () {
-  const SERVICE_INTERVAL = 15000; // Alle 15.000 km Service
+  const SERVICE_INTERVAL = 15000;
   
   if (!this.lastServiceKm) return true;
   
@@ -82,27 +81,24 @@ VehicleSchema.virtual('isServiceDue').get(function () {
   return kmSinceService >= SERVICE_INTERVAL;
 });
 
-// Methode: Service hinzufügen
 VehicleSchema.methods.addService = function (serviceData) {
   this.serviceHistory.push(serviceData);
   
-  // Aktualisiere Fahrzeugdaten
   this.currentKm = serviceData.km;
   this.lastServiceDate = serviceData.date;
   this.lastServiceKm = serviceData.km;
   
-  // Wenn TÜV durchgeführt wurde
+  // tuv gilt 2 jahre
   if (serviceData.isTuv) {
     this.lastTuvDate = serviceData.date;
     const nextTuv = new Date(serviceData.date);
-    nextTuv.setFullYear(nextTuv.getFullYear() + 2); // TÜV alle 2 Jahre
+    nextTuv.setFullYear(nextTuv.getFullYear() + 2);
     this.nextTuvDate = nextTuv;
   }
   
   return this.save();
 };
 
-// Sicherstellen dass virtuelle Felder in JSON enthalten sind
 VehicleSchema.set('toJSON', { virtuals: true });
 VehicleSchema.set('toObject', { virtuals: true });
 

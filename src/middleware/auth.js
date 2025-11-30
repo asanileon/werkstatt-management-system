@@ -1,40 +1,23 @@
 import { verifyToken, extractToken } from '../utils/jwt.js';
 
-// Middleware zum Prüfen der Authentifizierung
 export function checkAuth(req) {
   const token = extractToken(req.headers.authorization);
-
-  if (!token) {
-    return { authenticated: false, error: 'Kein Token vorhanden' };
-  }
+  if (!token) return { authenticated: false, error: 'Kein Token vorhanden' };
 
   const decoded = verifyToken(token);
+  if (!decoded) return { authenticated: false, error: 'Ungültiges Token' };
 
-  if (!decoded) {
-    return { authenticated: false, error: 'Ungültiges Token' };
-  }
-
-  // User-Daten an Request anhängen
   req.user = decoded;
   return { authenticated: true, user: decoded };
 }
 
-// Middleware zum Prüfen der Rolle
 export function checkRole(req, allowedRoles = []) {
   const authResult = checkAuth(req);
-
-  if (!authResult.authenticated) {
-    return authResult;
-  }
+  if (!authResult.authenticated) return authResult;
 
   const userRole = req.user.role;
+  if (allowedRoles.length === 0) return authResult;
 
-  // Wenn keine Rollen angegeben, nur Authentifizierung prüfen
-  if (allowedRoles.length === 0) {
-    return authResult;
-  }
-
-  // Rolle prüfen
   if (!allowedRoles.includes(userRole)) {
     return {
       authenticated: true,
@@ -46,7 +29,6 @@ export function checkRole(req, allowedRoles = []) {
   return { authenticated: true, authorized: true, user: req.user };
 }
 
-// Helper: API Handler mit Auth wrappen
 export function withAuth(handler, allowedRoles = []) {
   return async (req, res) => {
     const authCheck = checkRole(req, allowedRoles);

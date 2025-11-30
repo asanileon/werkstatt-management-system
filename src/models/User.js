@@ -14,7 +14,7 @@ const UserSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Passwort ist erforderlich'],
       minlength: 6,
-      select: false, // Passwort wird standardmäßig nicht zurückgegeben
+      select: false,
     },
     role: {
       type: String,
@@ -27,27 +27,21 @@ const UserSchema = new mongoose.Schema(
     },
   },
   {
-    timestamps: true, // CreatedAt und UpdatedAt automatisch
+    timestamps: true,
   }
 );
 
-// Passwort hashen vor dem Speichern
+// password hashen bei änderung
 UserSchema.pre('save', async function (next) {
-  // Nur hashen wenn Passwort geändert wurde
-  if (!this.isModified('password')) {
-    return next();
-  }
+  if (!this.isModified('password')) return next();
 
-  // Passwort mit bcrypt hashen
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
   next();
 });
 
-// Methode zum Passwort-Vergleich
 UserSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
-// Model nur einmal erstellen (wichtig für Next.js Hot Reload)
 export default mongoose.models.User || mongoose.model('User', UserSchema);

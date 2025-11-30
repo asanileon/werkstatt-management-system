@@ -1,6 +1,5 @@
 import jsPDF from 'jspdf';
 
-// text umbrechen wenn zu lang
 function splitTextToLines(doc, text, maxWidth) {
   const words = text.split(' ');
   const lines = [];
@@ -25,7 +24,6 @@ function splitTextToLines(doc, text, maxWidth) {
   return lines;
 }
 
-// service nachweis pdf generieren
 export function generateServicePDF(vehicle, services, companyData = null) {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -33,7 +31,6 @@ export function generateServicePDF(vehicle, services, companyData = null) {
   const margin = 20;
   let yPos = margin;
 
-  // firmendaten oben rechts
   if (companyData) {
     doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
@@ -55,13 +52,11 @@ export function generateServicePDF(vehicle, services, companyData = null) {
     yPos += 10;
   }
 
-  // titel
   doc.setFontSize(20);
   doc.setFont('helvetica', 'bold');
   doc.text('Service-Nachweis', pageWidth / 2, yPos, { align: 'center' });
   yPos += 15;
 
-  // fahrzeugdaten box
   doc.setFillColor(245, 245, 245);
   doc.rect(margin, yPos, pageWidth - 2 * margin, 35, 'F');
   yPos += 8;
@@ -82,7 +77,6 @@ export function generateServicePDF(vehicle, services, companyData = null) {
   doc.text(`Aktueller KM-Stand: ${vehicle.currentKm.toLocaleString('de-DE')} km`, margin + 5, yPos);
   yPos += 15;
 
-  // service historie überschrift
   doc.setFontSize(14);
   doc.setFont('helvetica', 'bold');
   doc.text('Service-Historie', margin, yPos);
@@ -94,13 +88,11 @@ export function generateServicePDF(vehicle, services, companyData = null) {
     doc.text('Keine Service-Einträge vorhanden', margin, yPos);
   } else {
     services.forEach((service, index) => {
-      // neue seite wenn zu wenig platz
       if (yPos > pageHeight - 50) {
         doc.addPage();
         yPos = margin;
       }
 
-      // service kopfzeile
       doc.setFillColor(250, 250, 250);
       doc.rect(margin, yPos - 5, pageWidth - 2 * margin, 8, 'F');
       
@@ -109,7 +101,6 @@ export function generateServicePDF(vehicle, services, companyData = null) {
       const serviceDate = new Date(service.date).toLocaleDateString('de-DE');
       doc.text(`${index + 1}. Service vom ${serviceDate}`, margin + 3, yPos);
       
-      // TÜV Badge
       if (service.isTuv) {
         doc.setFillColor(34, 197, 94);
         doc.rect(pageWidth - margin - 25, yPos - 4, 23, 6, 'F');
@@ -121,45 +112,39 @@ export function generateServicePDF(vehicle, services, companyData = null) {
       
       yPos += 8;
 
-      // km stand
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(10);
       doc.text(`KM-Stand: ${service.km.toLocaleString('de-DE')} km`, margin + 3, yPos);
       yPos += 7;
 
-      // beschreibung in 2 spalten
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(10);
-      const descMaxWidth = (pageWidth - 2 * margin - 10) / 2; // 2 Spalten
+      const descMaxWidth = (pageWidth - 2 * margin - 10) / 2;
       const descLines = splitTextToLines(doc, service.description, descMaxWidth);
       
       const leftColX = margin + 3;
       const rightColX = margin + 3 + descMaxWidth + 5;
       
       descLines.forEach((line, lineIndex) => {
-        // seitenumbruch wenn nötig
         if (yPos > pageHeight - 20) {
           doc.addPage();
           yPos = margin;
         }
         
-        // zwischen links und rechts wechseln
         if (lineIndex % 2 === 0) {
           doc.text(line, leftColX, yPos);
         } else {
           doc.text(line, rightColX, yPos);
-          yPos += 5; // nach rechter spalte runter
+          yPos += 5;
         }
       });
       
-      // ungerade zeilen = abstand hinzufügen
       if (descLines.length % 2 !== 0) {
         yPos += 5;
       }
       
       yPos += 5;
 
-      // kosten details
       const laborCost = service.laborHours * service.laborRate;
       const totalCost = service.partsCost + laborCost;
 
@@ -178,13 +163,11 @@ export function generateServicePDF(vehicle, services, companyData = null) {
       doc.text(`Gesamtkosten: ${totalCost.toFixed(2)} EUR`, margin + 3, yPos);
       yPos += 10;
 
-      // trennlinie
       doc.setDrawColor(220, 220, 220);
       doc.line(margin, yPos, pageWidth - margin, yPos);
       yPos += 8;
     });
 
-    // gesamtsumme
     const totalServiceCost = services.reduce((sum, service) => {
       return sum + service.partsCost + service.laborHours * service.laborRate;
     }, 0);
@@ -208,19 +191,16 @@ export function generateServicePDF(vehicle, services, companyData = null) {
     doc.setTextColor(0, 0, 0);
   }
 
-  // fußzeile
   doc.setFontSize(8);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(128, 128, 128);
   const footerText = `Erstellt am ${new Date().toLocaleDateString('de-DE')}`;
   doc.text(footerText, pageWidth / 2, pageHeight - 10, { align: 'center' });
 
-  // pdf speichern
   const fileName = `Service-Nachweis-${vehicle.licensePlate.replace(/\s/g, '-')}-${new Date().toISOString().split('T')[0]}.pdf`;
   doc.save(fileName);
 }
 
-// rechnung pdf erstellen
 export function generateInvoicePDF(vehicle, services, companyData, invoiceNumber = null) {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -228,7 +208,6 @@ export function generateInvoicePDF(vehicle, services, companyData, invoiceNumber
   const margin = 20;
   let yPos = margin;
 
-  // rechnungsnummer erstellen
   const invNumber = invoiceNumber || `R${Date.now()}`;
   const invDate = new Date().toLocaleDateString('de-DE', {
     year: 'numeric',
@@ -236,17 +215,14 @@ export function generateInvoicePDF(vehicle, services, companyData, invoiceNumber
     day: 'numeric'
   });
 
-  // große überschrift
   doc.setFontSize(32);
   doc.setFont('helvetica', 'bold');
   doc.text('RECHNUNG', margin, yPos);
   yPos += 25;
 
-  // zwei spalten layout
   const leftColX = margin;
   const rightColX = pageWidth / 2 + 10;
 
-  // links: empfänger
   doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
   doc.text('RECHNUNG AN:', leftColX, yPos);
@@ -267,7 +243,6 @@ export function generateInvoicePDF(vehicle, services, companyData, invoiceNumber
     yPos += 5;
   }
 
-  // rechts: rechnungsdetails
   let rightYPos = yPos - 18;
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
@@ -277,7 +252,6 @@ export function generateInvoicePDF(vehicle, services, companyData, invoiceNumber
 
   yPos += 15;
 
-  // firmendaten absender
   if (companyData && companyData.name) {
     doc.setFontSize(11);
     doc.setFont('helvetica', 'bold');
@@ -306,13 +280,11 @@ export function generateInvoicePDF(vehicle, services, companyData, invoiceNumber
 
   yPos += 20;
 
-  // trennlinie
   doc.setDrawColor(0, 0, 0);
   doc.setLineWidth(0.5);
   doc.line(margin, yPos, pageWidth - margin, yPos);
   yPos += 10;
 
-  // tabellen kopf
   doc.setFillColor(240, 240, 240);
   doc.rect(margin, yPos - 5, pageWidth - 2 * margin, 8, 'F');
 
@@ -331,12 +303,10 @@ export function generateInvoicePDF(vehicle, services, companyData, invoiceNumber
   let subtotal = 0;
 
   services.forEach((service, index) => {
-    // neue seite bei bedarf
     if (yPos > pageHeight - 60) {
       doc.addPage();
       yPos = margin;
       
-      // tabellen header nochmal
       doc.setFillColor(240, 240, 240);
       doc.rect(margin, yPos - 5, pageWidth - 2 * margin, 8, 'F');
       doc.setFont('helvetica', 'bold');
@@ -352,7 +322,6 @@ export function generateInvoicePDF(vehicle, services, companyData, invoiceNumber
 
     const serviceDate = new Date(service.date).toLocaleDateString('de-DE');
     
-    // service beschreibung
     const descMaxWidth = pageWidth - margin - 110;
     const descLines = splitTextToLines(doc, `${serviceDate} - ${service.description}`, descMaxWidth);
     
@@ -361,7 +330,6 @@ export function generateInvoicePDF(vehicle, services, companyData, invoiceNumber
       if (lineIdx < descLines.length - 1) yPos += 4;
     });
 
-    // material
     if (service.partsCost > 0) {
       yPos += 5;
       doc.text('Material', margin + 8, yPos);
@@ -371,7 +339,6 @@ export function generateInvoicePDF(vehicle, services, companyData, invoiceNumber
       subtotal += service.partsCost;
     }
 
-    // arbeit
     if (service.laborHours > 0) {
       yPos += 5;
       doc.text(`Arbeitszeit (${service.laborHours}h)`, margin + 8, yPos);
@@ -384,14 +351,12 @@ export function generateInvoicePDF(vehicle, services, companyData, invoiceNumber
 
     yPos += 8;
     
-    // trennlinie
     doc.setDrawColor(230, 230, 230);
     doc.setLineWidth(0.1);
     doc.line(margin, yPos, pageWidth - margin, yPos);
     yPos += 8;
   });
 
-  // zwischensumme
   yPos += 5;
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
@@ -399,14 +364,12 @@ export function generateInvoicePDF(vehicle, services, companyData, invoiceNumber
   doc.text(`${subtotal.toFixed(2)}€`, pageWidth - margin - 3, yPos, { align: 'right' });
   yPos += 6;
 
-  // mwst
   const taxRate = companyData?.taxRate || 0;
   const taxAmount = subtotal * (taxRate / 100);
   doc.text(`Steuer (${taxRate}%)`, pageWidth - margin - 50, yPos);
   doc.text(`${taxAmount.toFixed(2)}€`, pageWidth - margin - 3, yPos, { align: 'right' });
   yPos += 10;
 
-  // gesamtsumme
   const total = subtotal + taxAmount;
   doc.setDrawColor(0, 0, 0);
   doc.setLineWidth(1);
@@ -418,7 +381,6 @@ export function generateInvoicePDF(vehicle, services, companyData, invoiceNumber
   doc.text(`${total.toFixed(2)}€`, pageWidth - margin - 3, yPos + 5, { align: 'right' });
   yPos += 20;
 
-  // zahlungsinfos
   if (companyData && (companyData.bankName || companyData.iban)) {
     yPos += 5;
     doc.setFont('helvetica', 'bold');
@@ -438,14 +400,12 @@ export function generateInvoicePDF(vehicle, services, companyData, invoiceNumber
     }
   }
 
-  // fußzeile
   doc.setFontSize(8);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(128, 128, 128);
   const footerText = `Rechnung erstellt am ${new Date().toLocaleDateString('de-DE')}`;
   doc.text(footerText, pageWidth / 2, pageHeight - 10, { align: 'center' });
 
-  // pdf speichern
   const fileName = `Rechnung-${invNumber}-${vehicle.licensePlate.replace(/\s/g, '-')}.pdf`;
   doc.save(fileName);
 }

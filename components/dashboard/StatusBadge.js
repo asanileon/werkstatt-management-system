@@ -1,6 +1,5 @@
 import { AlertCircle, CheckCircle, Clock } from 'lucide-react';
 
-// status badge für tüv und service
 export default function StatusBadge({ type, status }) {
   const badges = {
     tuv: {
@@ -42,7 +41,7 @@ export default function StatusBadge({ type, status }) {
 
   return (
     <span
-      className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${badgeConfig.className}`}
+      className={`font-medium inline-flex border items-center text-xs rounded-full py-1 px-2.5 ${badgeConfig.className}`}
     >
       <Icon className="w-3 h-3 mr-1" />
       {badgeConfig.text}
@@ -50,9 +49,6 @@ export default function StatusBadge({ type, status }) {
   );
 }
 
-// helper funktionen
-
-// tüv status checken
 export function getTuvStatus(nextTuvDate) {
   if (!nextTuvDate) return 'ok';
 
@@ -60,15 +56,15 @@ export function getTuvStatus(nextTuvDate) {
   const tuvDate = new Date(nextTuvDate);
   const warningDate = new Date(tuvDate);
   warningDate.setMonth(warningDate.getMonth() - 1); // 1 monat vorher warnen
+  warningDate.setMonth(warningDate.getMonth() - 1);
 
   if (today >= tuvDate) return 'overdue';
   if (today >= warningDate) return 'warning';
   return 'ok';
 }
 
-// service status checken
 export function getServiceStatus(currentKm, lastServiceKm) {
-  const SERVICE_INTERVAL = 15000; // alle 15000 km
+  const SERVICE_INTERVAL = 15000;
   
   if (!lastServiceKm) return 'due';
   

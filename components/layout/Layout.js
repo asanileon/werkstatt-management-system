@@ -10,6 +10,7 @@ export default function Layout({ children }) {
     isAuth: s.isAuthenticated,
     logout: s.logout
   }));
+  // TODO: später responsive header vereinfachen
 
   const handleLogout = () => {
     logout();
@@ -22,16 +23,16 @@ export default function Layout({ children }) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm border-b border-gray-200">
+      <header className="border-b bg-white shadow-sm border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center cursor-pointer" onClick={() => router.push('/dashboard')}>
+          <div className="items-center h-16 flex justify-between">
+            <div className="cursor-pointer flex items-center" onClick={() => router.push('/dashboard')}>
               <Wrench className="h-8 w-8 text-primary" />
               <span className="ml-2 text-xl font-bold text-gray-900">Werkstatt System</span>
             </div>
 
             {isAuth && (
-              <div className="flex items-center space-x-4">
+              <div className="space-x-4 items-center flex">
                 <div className="flex items-center space-x-2">
                   <User className="h-5 w-5 text-gray-600" />
                   <div className="text-sm">
@@ -41,13 +42,13 @@ export default function Layout({ children }) {
                 </div>
 
                 {(user?.role === 'manager' || user?.role === 'Manager') && (
-                  <Link href="/settings" className="flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors">
+                  <Link href="/settings" className="px-3 py-2 hover:bg-gray-100 text-sm font-medium rounded-md flex items-center space-x-1 transition-colors text-gray-700">
                     <Settings className="h-4 w-4" />
                     <span>Einstellungen</span>
                   </Link>
                 )}
 
-                <button onClick={handleLogout} className="flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors">
+                <button onClick={handleLogout} className="px-3 py-2 transition-colors text-sm font-medium rounded-md flex items-center space-x-1 text-gray-700 hover:bg-gray-100">
                   <LogOut className="h-4 w-4" />
                   <span>Logout</span>
                 </button>
@@ -57,13 +58,13 @@ export default function Layout({ children }) {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         {children}
       </main>
 
-      <footer className="bg-white border-t border-gray-200 mt-auto">
+      <footer className="mt-auto bg-white border-t border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <p className="text-center text-sm text-gray-500">© 2025 Werkstatt Management System</p>
+          <p className="text-sm text-center text-gray-500">© 2025 Werkstatt Management System</p>
         </div>
       </footer>
     </div>

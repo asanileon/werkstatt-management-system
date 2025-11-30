@@ -4,17 +4,12 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 const useStore = create(
   persist(
     (set, get) => ({
-      // Auth State
       user: null,
       token: null,
       isAuthenticated: false,
-
-      // Fahrzeuge State
       vehicles: [],
       loading: false,
       error: null,
-
-      // Auth Actions
       login: (user, token) => {
         set({
           user,
@@ -31,8 +26,6 @@ const useStore = create(
           vehicles: [],
         });
       },
-
-      // Fahrzeuge Actions
       setVehicles: (vehicles) => {
         set({ vehicles });
       },

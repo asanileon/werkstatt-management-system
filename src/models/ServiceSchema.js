@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
 
-// Sub-Schema für Service-Einträge
 const ServiceSchema = new mongoose.Schema(
   {
     date: {
@@ -31,11 +30,11 @@ const ServiceSchema = new mongoose.Schema(
     },
     laborRate: {
       type: Number,
-      default: 80, // Standard Stundensatz
+      default: 80,
     },
     isTuv: {
       type: Boolean,
-      default: false, // Markierung ob es ein TÜV-Service war
+      default: false,
     },
     performedBy: {
       type: mongoose.Schema.Types.ObjectId,
@@ -47,7 +46,6 @@ const ServiceSchema = new mongoose.Schema(
   }
 );
 
-// Virtuelle Eigenschaft für Gesamtkosten
 ServiceSchema.virtual('totalCost').get(function () {
   return this.partsCost + this.laborHours * this.laborRate;
 });

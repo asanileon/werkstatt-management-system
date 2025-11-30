@@ -7,7 +7,6 @@ export default function Home() {
   const isAuthenticated = useStore((state) => state.isAuthenticated);
 
   useEffect(() => {
-    // Weiterleitung je nach Auth-Status
     if (isAuthenticated) {
       router.push('/dashboard');
     } else {

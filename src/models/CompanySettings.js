@@ -8,7 +8,6 @@ const CompanySettingsSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
-    // Firmendaten
     name: {
       type: String,
       required: true,
@@ -19,18 +18,15 @@ const CompanySettingsSchema = new mongoose.Schema(
     phone: String,
     email: String,
     website: String,
-    // Bankdaten
     bankName: String,
     iban: String,
     bic: String,
-    // Steuerdaten
     taxId: String,
     vatId: String,
     taxRate: {
       type: Number,
       default: 19,
     },
-    // Rechnungseinstellungen
     invoicePrefix: {
       type: String,
       default: 'R',

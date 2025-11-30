@@ -6,6 +6,7 @@ import useStore from '../../src/store/useStore';
 export default function VehicleCard({ vehicle: v, onDelete }) {
   const router = useRouter();
   const user = useStore((state) => state.user);
+  // TODO: später in eigene component auslagern (owner block)
 
   const tuvStatus = getTuvStatus(v.nextTuvDate);
   const svcStatus = getServiceStatus(v.currentKm, v.lastServiceKm);
@@ -24,7 +25,7 @@ export default function VehicleCard({ vehicle: v, onDelete }) {
 
   return (
     <div
-      className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer border border-gray-200"
+      className="cursor-pointer border bg-white border-gray-200 rounded-lg shadow-md hover:shadow-lg transition-shadow"
       onClick={handleCardClick}
     >
       <div className="p-6">
@@ -46,7 +47,7 @@ export default function VehicleCard({ vehicle: v, onDelete }) {
           {user?.role === 'Manager' && (
             <button
               onClick={handleDelete}
-              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              className="rounded-lg p-2 text-red-600 transition-colors hover:bg-red-50"
               title="löschen"
             >
               <Trash2 className="h-5 w-5" />
